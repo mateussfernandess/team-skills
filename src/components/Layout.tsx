@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Users, BarChart3, TrendingUp } from 'lucide-react';
+import { Users, BarChart3, TrendingUp, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Users },
   { name: 'Skill Analysis', href: '/skill-analysis', icon: BarChart3 },
   { name: 'Career Insights', href: '/career-insights', icon: TrendingUp },
+  { name: 'Data Management', href: '/data-management', icon: Settings },
 ];
 
 interface LayoutProps {

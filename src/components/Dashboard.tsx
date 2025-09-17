@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Users, Award, TrendingUp } from 'lucide-react';
+import { SupplyAnalysis } from './SupplyAnalysis';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,36 +9,56 @@ import { people, positions, skills } from '@/data/sample-data';
 import { calculateSkillGaps } from '@/utils/skills-calculations';
 import { SKILL_RANKS } from '@/types/skills-matrix';
 
-export default function Dashboard() {
+import { Person, Position, Skill } from '@/types/skills-matrix';
+
+interface DashboardProps {
+  people?: Person[];
+  positions?: Position[];
+  skills?: Skill[];
+  onUpdatePeople?: (people: Person[]) => void;
+  onUpdatePositions?: (positions: Position[]) => void;
+  onUpdateSkills?: (skills: Skill[]) => void;
+}
+
+export default function Dashboard({ 
+  people: propsPeople, 
+  positions: propsPositions, 
+  skills: propsSkills 
+}: DashboardProps = {}) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Use props if provided, otherwise fall back to imported data
+  const currentPeople = propsPeople || people;
+  const currentPositions = propsPositions || positions;
+  const currentSkills = propsSkills || skills;
 
   // Get position lookup map
   const positionsMap = useMemo(() => {
-    return new Map(positions.map(pos => [pos.id, pos]));
-  }, []);
+    return new Map(currentPositions.map(pos => [pos.id, pos]));
+  }, [currentPositions]);
 
   // Filter people based on search
   const filteredPeople = useMemo(() => {
-    return people.filter(person => 
+    return currentPeople.filter(person => 
       person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       positionsMap.get(person.position_id)?.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, positionsMap]);
+  }, [searchTerm, positionsMap, currentPeople]);
 
   // Calculate summary stats
   const stats = useMemo(() => {
-    const totalEmployees = people.length;
-    const totalPositions = new Set(people.map(p => p.position_id)).size;
-    const totalSkills = skills.length;
+    const totalEmployees = currentPeople.length;
+    const totalPositions = new Set(currentPeople.map(p => p.position_id)).size;
+    const totalSkills = currentSkills.length;
     
     // Calculate average skill readiness
     let totalGaps = 0;
     let totalRequiredSkills = 0;
     
-    people.forEach(person => {
+    currentPeople.forEach(person => {
       const position = positionsMap.get(person.position_id);
       if (position) {
-        const gaps = calculateSkillGaps(person, position, skills);
+        const gaps = calculateSkillGaps(person, position, currentSkills);
         const requiredSkills = gaps.filter(gap => gap.required > 0);
         const metSkills = requiredSkills.filter(gap => gap.gap >= 0);
         
@@ -49,7 +70,7 @@ export default function Dashboard() {
     const readinessPercentage = totalRequiredSkills > 0 ? Math.round((totalGaps / totalRequiredSkills) * 100) : 0;
     
     return { totalEmployees, totalPositions, totalSkills, readinessPercentage };
-  }, [positionsMap]);
+  }, [positionsMap, currentPeople, currentSkills]);
 
   return (
     <div className="space-y-6">
@@ -146,7 +167,7 @@ export default function Dashboard() {
                 {filteredPeople.map((person) => {
                   const position = positionsMap.get(person.position_id);
                   const skillCount = Object.keys(person.skills_acquired).length;
-                  const gaps = position ? calculateSkillGaps(person, position, skills) : [];
+                  const gaps = position ? calculateSkillGaps(person, position, currentSkills) : [];
                   const deficits = gaps.filter(gap => gap.status === 'deficit').length;
                   
                   return (
@@ -197,6 +218,13 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Supply Analysis */}
+      <SupplyAnalysis 
+        people={currentPeople} 
+        positions={currentPositions} 
+        skills={currentSkills} 
+      />
     </div>
   );
 }

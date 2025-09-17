@@ -5,11 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { people, positions, skills } from '@/data/sample-data';
+import { people as defaultPeople, positions as defaultPositions, skills as defaultSkills } from '@/data/sample-data';
 import { calculateSkillsNeededForPosition, findReadyPositions } from '@/utils/skills-calculations';
-import { SKILL_RANKS } from '@/types/skills-matrix';
+import { SKILL_RANKS, Person, Position, Skill } from '@/types/skills-matrix';
 
-export default function StrategicAnalysis() {
+interface StrategicAnalysisProps {
+  people?: Person[];
+  positions?: Position[];
+  skills?: Skill[];
+}
+
+export default function StrategicAnalysis({ 
+  people = defaultPeople,
+  positions = defaultPositions,
+  skills = defaultSkills
+}: StrategicAnalysisProps = {}) {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(people[0].id);
   const [targetPositionId, setTargetPositionId] = useState<string>('');
 

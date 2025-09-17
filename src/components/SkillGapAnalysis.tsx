@@ -7,13 +7,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { people, positions, skills } from '@/data/sample-data';
+import { people as defaultPeople, positions as defaultPositions, skills as defaultSkills } from '@/data/sample-data';
 import { calculateSkillGaps, getSkillGapColorClass } from '@/utils/skills-calculations';
-import { SKILL_RANKS } from '@/types/skills-matrix';
+import { SKILL_RANKS, Person, Position, Skill } from '@/types/skills-matrix';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-export default function SkillGapAnalysis() {
+interface SkillGapAnalysisProps {
+  people?: Person[];
+  positions?: Position[];
+  skills?: Skill[];
+  onUpdatePeople?: (people: Person[]) => void;
+}
+
+export default function SkillGapAnalysis({ 
+  people = defaultPeople,
+  positions = defaultPositions,
+  skills = defaultSkills,
+  onUpdatePeople 
+}: SkillGapAnalysisProps = {}) {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [editingSkill, setEditingSkill] = useState<string | null>(null);
